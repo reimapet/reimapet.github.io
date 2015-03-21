@@ -106,8 +106,6 @@ listGoodCols &lt;- function ( df, percentage=0.50 )
 goodCols &lt;- listGoodCols( clean_train, 0.6 )
 clean_train &lt;- clean_train[, goodCols]
 
-## remove id
-## clean_train &lt;- clean_train[c(-1)]
 ncol( clean_train )</code></pre>
 <pre><code>## [1] 59</code></pre>
 <pre class="r"><code>colnames( clean_train)</code></pre>
@@ -182,7 +180,7 @@ confusionMatrix( predictions_dt, clean_traintest$classe)</code></pre>
 ## Detection Rate         0.2632  0.09635   0.1458   0.1020   0.1304
 ## Detection Prevalence   0.3288  0.13255   0.2159   0.1420   0.1807
 ## Balanced Accuracy      0.9146  0.72843   0.8615   0.7967   0.8259</code></pre>
-<p>Random forest gives an accuracy of 73% which in some real world cases is ok, but not very good in the context of this exercise. It is particularly bad at detecting activity <em>D</em> at only 55% accuracy.</p>
+<p>Random forest gives an accuracy of 74% which in some real world cases is ok, but not very good in the context of this exercise. It is particularly bad at detecting activity <em>D</em> at only 55% accuracy.</p>
 </div>
 <div id="run-a-random-forest-model" class="section level2">
 <h2>Run a random forest model</h2>
@@ -332,6 +330,7 @@ print( fit_randomForest2 )</code></pre>
 ## C    0   25 1965   17    0 0.020926756
 ## D    0    0   32 1934    2 0.017276423
 ## E    0    2    5   11 2155 0.008283479</code></pre>
+<p>Check the reduced model against our <em>train_test</em> dataset.</p>
 <pre class="r"><code>predictions_rf2 &lt;- predict( fit_randomForest2, clean_traintest ) 
 confusionMatrix( predictions_rf2, clean_traintest$classe)</code></pre>
 <pre><code>## Confusion Matrix and Statistics
@@ -370,13 +369,10 @@ confusionMatrix( predictions_rf2, clean_traintest$classe)</code></pre>
 </div>
 <div id="test-data-set" class="section level1">
 <h1>Test data set</h1>
-<p>Now we run both <em>random forest</em> models against test dataset and see whether they produce similar results.</p>
+<p>Now we run both <em>random forest</em> models against test dataset and see whether they produce similar results. As we did not perform any transformations to the training data (we just removed excess columns) we don’t have to process test data. Models just pick the columns they want to use.</p>
 <pre class="r"><code>testdata &lt;- read.csv(&quot;pml-testing.csv&quot;, header=TRUE)
 
-reducedTestCols &lt;- c(&quot;roll_belt&quot;,&quot;yaw_belt&quot;, &quot;magnet_dumbbell_z&quot;, &quot;pitch_forearm&quot;, &quot;pitch_belt&quot;, &quot;magnet_dumbbell_y&quot;, &quot;roll_forearm&quot;, &quot;magnet_dumbbell_x&quot;, &quot;accel_belt_z&quot;, &quot;magnet_belt_z&quot;, &quot;accel_dumbbell_y&quot;, &quot;roll_dumbbell&quot;, &quot;magnet_belt_y&quot;, &quot;accel_dumbbell_z&quot;, &quot;roll_arm&quot;, &quot;accel_forearm_x&quot;, &quot;gyros_belt_z&quot;, &quot;yaw_dumbbell&quot;, &quot;accel_dumbbell_x&quot;, &quot;gyros_dumbbell_y&quot;)
-
-clean_testdata &lt;- testdata[,reducedTestCols]
-answers &lt;- predict( fit_randomForest2, clean_testdata )  
+answers &lt;- predict( fit_randomForest2, testdata )  
 answers2 &lt;- predict( fit_randomForest, testdata )
 answers == answers2</code></pre>
 <pre><code>##  [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
@@ -385,7 +381,8 @@ answers == answers2</code></pre>
 </div>
 <div id="conclusions" class="section level1">
 <h1>Conclusions</h1>
-<p>We were able to achieve 98.8 accuracy with a random forest model and were able to predict all the test cases perfectly. OOB error for the model is 1.37 with the training data. 20 most important parameters were used for the model.</p>
+<p>We were able to achieve 98.8 accuracy with a random forest model and were able to predict all the test cases perfectly. OOB error for the model is 1.37% with the training data. 20 most important parameters were used for the model.</p>
+<p>It would probably be possible to reduce the number of predictors even further by repeating the process of using the most important predictors.</p>
 </div>
 
 
